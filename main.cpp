@@ -41,10 +41,10 @@ void myVecFunc(Iter begin, Iter end, const int& num, Func func){
 int main() {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dist(10, 50);
+    std::uniform_int_distribution<> dist(0, 8);
     std::uniform_real_distribution<> dist2(10,20);
-    int size = 30;
-    int countOfThread = 5;
+    int size = 10;
+    int countOfThread = 10;
     std::vector<int> vector1(size);
     for(int i = 0; i < size; i++){
         vector1[i] = dist(gen);
