@@ -2,10 +2,10 @@
 #include <vector>
 #include <thread>
 #include <mutex>
-#include <string>
 #include <iterator>
 #include <functional>
 #include <algorithm>
+#include <random>
 
 std::mutex mut;
 
@@ -14,7 +14,6 @@ void myVecFunc(Iter begin, Iter end, const int& num, Func func){
     std::vector<std::thread> threads(num);
     for(int i = 0; i < num; i++) {
         threads[i] = std::thread([&begin, end, func](){
-            int j;
             Iter it;
             while(begin != end){
                 {
@@ -36,20 +35,39 @@ void myVecFunc(Iter begin, Iter end, const int& num, Func func){
 
 
 
-int main() { //int argc, char* argv[]
-   // int size = atoi(argv[1]);
-   // int countOfThread = atoi(argv[2]);
+int main() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dist(1, 20);
+    std::uniform_real_distribution<> dist2(1,20);
     int size = 5;
     int countOfThread = 3;
     std::vector<int> vector1(size);
     for(int i = 0; i < size; i++){
-        vector1[i] = i;
+        vector1[i] = dist(gen);
     }
     std::vector<double> vector2(size);
+    for(auto& v : vector2){
+        v = dist2(gen);
+    }
+    for(auto& v : vector2){
+        std::cout<<v<<" ";
+    }
+    std::cout<<std::endl;
+    for(auto& v : vector1){
+        std::cout<<v<<" ";
+    }
+    std::cout<<std::endl;
     myVecFunc( vector1.begin(), vector1.end(),countOfThread, [](int& n ){
         n++;
         std::cout<< std::to_string(n) + "\n";
     });
+    std::cout<<std::endl;
+    myVecFunc( vector2.begin(),vector2.end(), countOfThread, [](double& n){
+        n--;
+        std::cout<< std::to_string(n) + "\n";
+    });
+    std::cout<<std::endl;
 
     return 0;
 }
