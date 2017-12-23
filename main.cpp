@@ -5,25 +5,52 @@
 #include <string>
 #include <iterator>
 #include <functional>
+#include <algorithm>
 
-template <class T>
-std::vector<T> myVecFunc(std::vector<T> vector, std::iterator begin, std::iterator end, int num, std::function func){
-   //create num threads
-   //they take elem of vector and call func
+std::mutex mut;
+
+template <class Iter, class Func>
+void myVecFunc(Iter begin, Iter end, const int& num, Func func){
+    std::vector<std::thread> threads(num);
+    for(int i = 0; i < num; i++) {
+        threads[i] = std::thread([&begin, end, func](){
+            int j;
+            Iter it;
+            while(begin != end){
+                {
+                    std::lock_guard<std::mutex> lockMut(mut);
+                    it = begin;
+                    begin++;
+                }
+                func(*it);
+            }
+
+        });
+
+    }
+    for(int i = 0; i < num; i++){
+        threads[i].join();
+    }
 }
 
 
-int main(int argc, char* argv[]) {
-    int size = atoi(argv[1]);
-    int countOfThread = atoi(argv[2]);
-    std::vector<int> vector1(size) ;
+
+
+int main() { //int argc, char* argv[]
+   // int size = atoi(argv[1]);
+   // int countOfThread = atoi(argv[2]);
+    int size = 5;
+    int countOfThread = 3;
+    std::vector<int> vector1(size);
+    for(int i = 0; i < size; i++){
+        vector1[i] = i;
+    }
     std::vector<double> vector2(size);
-    std::vector<std::string> vector3(size);
-    auto start;
-    auto endv;
-    myVecFunc(vector1, start = begin(vector1),endv = end(vector1),countOfThread, [](){
-        //doing something
+    myVecFunc( vector1.begin(), vector1.end(),countOfThread, [](int& n ){
+        n++;
+        std::cout<< std::to_string(n) + "\n";
     });
 
     return 0;
 }
+
