@@ -9,11 +9,21 @@
 
 std::mutex mut;
 
+//template<class T>
+class SimpleFunctor {
+public:
+    SimpleFunctor(){};
+    void operator()(int& n) {
+        n = n * n * n;
+    }
+};
+
+
 template <class Iter, class Func>
 void myVecFunc(Iter begin, Iter end, const int& num, Func func){
     std::vector<std::thread> threads(num);
     for(int i = 0; i < num; i++) {
-        threads[i] = std::thread([&begin, end, func](){
+        threads[i] = std::thread([&begin, end, &func](){
             Iter it;
             while(begin != end) {
                 {
@@ -35,16 +45,21 @@ void myVecFunc(Iter begin, Iter end, const int& num, Func func){
     }
 }
 
+//template<class T>
+void foo(int& n){
+    n = n * n;
+}
 
 
 
 int main() {
+    SimpleFunctor f;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dist(0, 8);
     std::uniform_real_distribution<> dist2(10,20);
     int size = 10;
-    int countOfThread = 10;
+    int countOfThread = 4;
     std::vector<int> vector1(size);
     for(int i = 0; i < size; i++){
         vector1[i] = dist(gen);
@@ -57,6 +72,8 @@ int main() {
         std::cout<<v<<" ";
     }
     std::cout<<std::endl;
+
+
 
     myVecFunc( vector1.begin(), vector1.end(),countOfThread, [](int& n ){
         n++;
@@ -72,6 +89,20 @@ int main() {
         std::cout<< std::to_string(n) + " ";
     });
     std::cout<<std::endl;
+    myVecFunc( vector1.begin(), vector1.end(),countOfThread, foo);
+    std::cout<<std::endl;
+    for(auto& v : vector1){
+        std::cout<<v<<" ";
+    }
+    std::cout<<std::endl;
+    myVecFunc( vector1.begin(), vector1.end(),countOfThread, f);
+    std::cout<<std::endl;
+    for(auto& v : vector1){
+        std::cout<<v<<" ";
+    }
+    std::cout<<std::endl;
+
+
 
     return 0;
 }
